@@ -1,4 +1,4 @@
-import { copyFileSync, mkdirSync, existsSync } from "node:fs";
+import { copyFileSync, mkdirSync, existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const botDir = process.env.MAKEFUN_BOT_DIR ?? "/bot";
@@ -8,6 +8,10 @@ try {
   const src = join(botDir, "POST.json");
   if (!existsSync(src)) {
     throw new Error(`POST.json not found in bot directory: ${src}`);
+  }
+  const parsed = JSON.parse(readFileSync(src, "utf8"));
+  if (typeof parsed !== "object" || parsed === null || typeof parsed.url !== "string" || parsed.url.length === 0) {
+    throw new Error(`POST.json must name the post with a "url" string: ${src}`);
   }
   mkdirSync(outDir, { recursive: true });
   copyFileSync(src, join(outDir, "POST.json"));
